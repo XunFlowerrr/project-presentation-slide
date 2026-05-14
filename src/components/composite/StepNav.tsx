@@ -1,29 +1,36 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { SlideContext } from "../../context/SlideContext.tsx";
 
 // ── useStepNav ─────────────────────────────────────────────────────────────
 // Manages activeStep (0 = overview, 1…total = steps).
 // Binds , / . keyboard shortcuts.
 export function useStepNav(total: number) {
-  const [activeStep, setActiveStep] = useState(0);
+  const { stepOverride } = useContext(SlideContext);
+  const [stateStep, setStateStep] = useState(0);
+
+  const activeStep = stepOverride !== undefined ? stepOverride : stateStep;
 
   useEffect(() => {
+    if (stepOverride !== undefined) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === ",") setActiveStep((s) => (s <= 0 ? total : s - 1));
-      if (e.key === ".") setActiveStep((s) => (s >= total ? 0 : s + 1));
+      if (e.key === ",") setStateStep((s) => (s <= 0 ? total : s - 1));
+      if (e.key === ".") setStateStep((s) => (s >= total ? 0 : s + 1));
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [total]);
+  }, [total, stepOverride]);
 
   function advance() {
-    setActiveStep((s) => (s >= total ? 0 : s + 1));
+    if (stepOverride !== undefined) return;
+    setStateStep((s) => (s >= total ? 0 : s + 1));
   }
   function retreat() {
-    setActiveStep((s) => (s <= 0 ? total : s - 1));
+    if (stepOverride !== undefined) return;
+    setStateStep((s) => (s <= 0 ? total : s - 1));
   }
 
-  return { activeStep, setActiveStep, advance, retreat };
+  return { activeStep, setActiveStep: setStateStep, advance, retreat };
 }
 
 // ── StepNavBar ─────────────────────────────────────────────────────────────

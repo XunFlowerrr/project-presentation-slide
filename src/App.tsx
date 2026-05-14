@@ -3,6 +3,12 @@ import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import { slides, sections, trackerSlideCount } from "./slides/index.ts";
 import { DemoVideo } from "./slides/DemoVideo.tsx";
+import { SharePointSync } from "./slides/SharePointSync.tsx";
+import { ReActFlow } from "./slides/ReActFlow.tsx";
+import { AttachmentFlow } from "./slides/AttachmentFlow.tsx";
+import { WebCapabilities } from "./slides/WebCapabilities.tsx";
+import { WebCapabilities2 } from "./slides/WebCapabilities2.tsx";
+import { OperationalModes } from "./slides/OperationalModes.tsx";
 import { usePresentation } from "./hooks/usePresentation.ts";
 import { PresentationFrame, ProgressTracker } from "./components/index.ts";
 import { SlideContext } from "./context/SlideContext.tsx";
@@ -32,6 +38,16 @@ function useConfettiKey() {
   }, []);
 }
 
+function getSlideSteps(Slide: any): number[] {
+  if (Slide === SharePointSync) return [0, 1, 2, 3, 4, 5];
+  if (Slide === ReActFlow) return [0, 1, 2, 3, 4, 5, 6];
+  if (Slide === AttachmentFlow) return [0, 1, 2, 3, 4, 5, 6];
+  if (Slide === WebCapabilities) return [0, 1, 2];
+  if (Slide === WebCapabilities2) return [0, 1, 2];
+  if (Slide === OperationalModes) return [0, 1, 2, 3];
+  return [0];
+}
+
 export default function App() {
   useConfettiKey();
   const state = usePresentation(slides.length);
@@ -41,10 +57,18 @@ export default function App() {
   const isPrintMode = new URLSearchParams(window.location.search).has('print');
 
   if (isPrintMode) {
+    const printPages: { Slide: any; slideNum: number; stepOverride: number }[] = [];
+    slides.forEach((Slide, idx) => {
+      const steps = getSlideSteps(Slide);
+      steps.forEach((stepOverride) => {
+        printPages.push({ Slide, slideNum: idx + 1, stepOverride });
+      });
+    });
+
     return (
       <MotionConfig transition={{ duration: 0 }}>
         <div style={{ background: '#000', width: '1920px', margin: 0, padding: 0 }}>
-          {slides.map((Slide, idx) => (
+          {printPages.map(({ Slide, slideNum, stepOverride }, idx) => (
             <div
               key={idx}
               style={{
@@ -60,7 +84,7 @@ export default function App() {
                 background: '#000',
               }}
             >
-              <SlideContext.Provider value={{ slideNum: idx + 1, goTo: () => {} }}>
+              <SlideContext.Provider value={{ slideNum, goTo: () => {}, stepOverride }}>
                 <div
                   style={{
                     width: 1920,

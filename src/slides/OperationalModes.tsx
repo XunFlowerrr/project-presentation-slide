@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
+import { SlideContext } from "../context/SlideContext.tsx";
 import {
   SlideHeader,
   SlideShell,
@@ -93,21 +94,24 @@ export function OperationalModes() {
   const agentRef = useRef<HTMLDivElement>(null);
   const searchToolRef = useRef<HTMLDivElement>(null);
   const lookupToolRef = useRef<HTMLDivElement>(null);
-  const [activeMode, setActiveMode] = useState(MODES[0]);
+  const { stepOverride } = useContext(SlideContext);
+  const [stateMode, setStateMode] = useState(MODES[0]);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Cycle through modes for demo unless hovered
+  const activeMode = stepOverride !== undefined ? MODES[stepOverride] : stateMode;
+
+  // Cycle through modes for demo unless hovered or printing
   useEffect(() => {
-    if (isHovered) return;
+    if (isHovered || stepOverride !== undefined) return;
     const interval = setInterval(() => {
-      setActiveMode((prev) => {
+      setStateMode((prev) => {
         const nextIndex =
           (MODES.findIndex((m) => m.id === prev.id) + 1) % MODES.length;
         return MODES[nextIndex];
       });
     }, 4500);
     return () => clearInterval(interval);
-  }, [isHovered]);
+  }, [isHovered, stepOverride]);
 
   return (
     <SlideShell glows={GLOWS}>
@@ -368,7 +372,7 @@ export function OperationalModes() {
               <motion.div
                 key={mode.id}
                 {...fadeInUp(0.4 + idx * 0.1)}
-                onClick={() => setActiveMode(mode)}
+                onClick={() => setStateMode(mode)}
                 style={{
                   background:
                     activeMode.id === mode.id
