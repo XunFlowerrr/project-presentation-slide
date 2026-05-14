@@ -23,3 +23,14 @@ body,
   --slide-body: 20px;
   --slide-card-heading: 20px;
 }
+
+@media print {
+  html, body, #root {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  @page {
+    size: 1920px 1080px;
+    margin: 0px;
+  }
+}

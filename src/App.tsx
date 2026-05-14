@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import { slides, sections, trackerSlideCount } from "./slides/index.ts";
@@ -37,6 +37,48 @@ export default function App() {
   const state = usePresentation(slides.length);
   const { currentIndex, direction, goTo } = state;
   const CurrentSlide = slides[currentIndex];
+
+  const isPrintMode = new URLSearchParams(window.location.search).has('print');
+
+  if (isPrintMode) {
+    return (
+      <MotionConfig transition={{ duration: 0 }}>
+        <div style={{ background: '#000', width: '1920px', margin: 0, padding: 0 }}>
+          {slides.map((Slide, idx) => (
+            <div
+              key={idx}
+              style={{
+                width: '1920px',
+                height: '1080px',
+                position: 'relative',
+                overflow: 'hidden',
+                pageBreakAfter: 'always',
+                breakAfter: 'page',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#000',
+              }}
+            >
+              <SlideContext.Provider value={{ slideNum: idx + 1, goTo: () => {} }}>
+                <div
+                  style={{
+                    width: 1920,
+                    height: 1080,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Slide />
+                </div>
+              </SlideContext.Provider>
+            </div>
+          ))}
+        </div>
+      </MotionConfig>
+    );
+  }
 
   const currentSlideNum = currentIndex + 1;
   const isCoverSlide = currentSlideNum === 1;
