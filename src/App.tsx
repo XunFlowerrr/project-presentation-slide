@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import confetti from "canvas-confetti";
 import { slides, sections, trackerSlideCount } from "./slides/index.ts";
 import { DemoVideo } from "./slides/DemoVideo.tsx";
+import { SolutionOverview } from "./slides/SolutionOverview.tsx";
 import { SharePointSync } from "./slides/SharePointSync.tsx";
 import { ReActFlow } from "./slides/ReActFlow.tsx";
 import { AttachmentFlow } from "./slides/AttachmentFlow.tsx";
@@ -39,6 +40,7 @@ function useConfettiKey() {
 }
 
 function getSlideSteps(Slide: any): number[] {
+  if (Slide === SolutionOverview) return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   if (Slide === SharePointSync) return [0, 1, 2, 3, 4, 5];
   if (Slide === ReActFlow) return [0, 1, 2, 3, 4, 5, 6];
   if (Slide === AttachmentFlow) return [0, 1, 2, 3, 4, 5, 6];

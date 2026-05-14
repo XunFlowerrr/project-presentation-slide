@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
+import { SlideContext } from "../context/SlideContext.tsx";
 import {
   SlideHeader,
   SlideShell,
@@ -12,6 +13,14 @@ const GLOWS = [
   { top: -200, right: -100, size: 640, color: "124,58,237", opacity: 0.08 },
   { bottom: -150, left: -80, size: 500, color: "16,185,129", opacity: 0.07 },
 ];
+
+interface ActiveCard {
+  id: keyof typeof NS;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
 
 function SVGWrap({ children }: { children: React.ReactNode }) {
   return (
@@ -768,6 +777,8 @@ export function SolutionOverview() {
   const s3Ref = useRef<HTMLDivElement>(null);
   const qdrantRef = useRef<HTMLDivElement>(null);
 
+  const { stepOverride } = useContext(SlideContext);
+
   function getCardRect(el: HTMLElement): Omit<ActiveCard, "id"> {
     const measureEl = measureRef.current!;
     const slideRect = measureEl.getBoundingClientRect();
@@ -781,16 +792,6 @@ export function SolutionOverview() {
     };
   }
 
-  function makeOnClick(id: keyof typeof NS) {
-    return (e: React.MouseEvent<HTMLDivElement>) => {
-      if (active?.id === id) {
-        setActive(null);
-        return;
-      }
-      setActive({ id, ...getCardRect(e.currentTarget) });
-    };
-  }
-
   // Called from service chips inside the popover — looks up the real card DOM node.
   function navigateTo(id: keyof typeof NS) {
     const el = cardRefs.current[id];
@@ -799,6 +800,40 @@ export function SolutionOverview() {
       setPulsingId(id);
       setPulseVersion((v) => v + 1);
     }
+  }
+
+  useEffect(() => {
+    if (stepOverride && stepOverride > 0) {
+      const timer = setTimeout(() => {
+        const order: (keyof typeof NS)[] = [
+          "frontend",
+          "webhook",
+          "storage",
+          "mq",
+          "ingestion",
+          "embedding",
+          "ai",
+          "sharepoint",
+          "s3",
+          "qdrant",
+        ];
+        const id = order[stepOverride - 1];
+        if (id) {
+          navigateTo(id);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [stepOverride]);
+
+  function makeOnClick(id: keyof typeof NS) {
+    return (e: React.MouseEvent<HTMLDivElement>) => {
+      if (active?.id === id) {
+        setActive(null);
+        return;
+      }
+      setActive({ id, ...getCardRect(e.currentTarget) });
+    };
   }
 
   return (
