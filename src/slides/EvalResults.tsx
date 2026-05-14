@@ -399,6 +399,30 @@ export function EvalResults() {
           marginTop: 20,
         }}
       >
+        {/* ── Evaluation Context ── */}
+        <motion.div {...fadeInUp(0.1, { distance: 10, duration: DURATION.med })}>
+          <Callout
+            eyebrow="Evaluation Methodology"
+            color="#3B82F6"
+            rgb="59,130,246"
+            bgOpacity={0.04}
+            padding="16px 22px"
+          >
+            <p
+              style={{
+                margin: 0,
+                fontSize: "var(--slide-body)",
+                color: "#374151",
+                lineHeight: 1.6,
+              }}
+            >
+              <ThaiText en="We evaluate our system by using a ground test question set with a set of questions and answers provided by SCBTechX, in both Thai and English versions.">
+                เราประเมินระบบของเราโดยใช้ชุดคำถาม ground test ซึ่งประกอบด้วยชุดคำถามและคำตอบที่ให้มาโดย SCBTechX ทั้งในเวอร์ชันภาษาไทยและภาษาอังกฤษ
+              </ThaiText>
+            </p>
+          </Callout>
+        </motion.div>
+
         {/* ── Top row: 4 Metric Cards ── */}
         <div style={{ display: "flex", gap: 16, flex: 1 }}>
           {METRICS.map((m, i) => (
@@ -566,7 +590,7 @@ export function EvalResults() {
             style={{ flex: 1 }}
           >
             <Callout
-              eyebrow="Key Takeaway"
+              eyebrow="Key Strength"
               color="#10B981"
               rgb="16,185,129"
               bgOpacity={0.04}
@@ -581,15 +605,42 @@ export function EvalResults() {
                   lineHeight: 1.6,
                 }}
               >
-                <ThaiText en="The standout Tool Correctness (99%) and Task Completion (97%) scores validate the high reliability of CrewAI reasoning and the MCP tool integration. Faithfulness at 77% still leaves room for further gains through better prompt engineering.">
+                <ThaiText en="Standout Tool Correctness (99%) and Task Completion (97%) scores validate the high reliability of CrewAI reasoning and the MCP tool integration.">
                   คะแนน Tool Correctness{" "}
                   <strong style={{ color: "#10B981" }}>(99%)</strong> และ Task
                   Completion <strong style={{ color: "#10B981" }}>(97%)</strong>{" "}
-                  ที่โดดเด่น
                   ช่วยยืนยันความน่าเชื่อถือระดับสูงของกระบวนการให้เหตุผลแบบ
-                  CrewAI และการเชื่อมต่อผ่าน MCP ส่วนคะแนน Faithfulness ที่ 77%
-                  นั้นยังมีพื้นที่ให้พัฒนาต่อยอดได้ด้วยการปรับปรุง Prompt
-                  Engineering
+                  CrewAI และการเชื่อมต่อผ่าน MCP
+                </ThaiText>
+              </p>
+            </Callout>
+          </motion.div>
+
+          <motion.div
+            {...fadeInUp(0.88, { distance: 20, duration: DURATION.med })}
+            style={{ flex: 1 }}
+          >
+            <Callout
+              eyebrow="Retrieval Challenge"
+              color="#7C3AED"
+              rgb="124,58,237"
+              bgOpacity={0.04}
+              padding="18px 22px"
+              style={{ height: "100%" }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "var(--slide-body)",
+                  color: "#374151",
+                  lineHeight: 1.6,
+                }}
+              >
+                <ThaiText en="Faithfulness (77%) reveals occasional external knowledge intrusion when context is sparse. This highlights limits of static top-k retrieval: risking unrelated chunks or missing distributed context.">
+                  คะแนน Faithfulness{" "}
+                  <strong style={{ color: "#7C3AED" }}>(77%)</strong>{" "}
+                  ชี้ให้เห็นถึงข้อจำกัดของการดึงข้อมูลแบบตายตัว (Fixed Top-K)
+                  ที่อาจดึงข้อมูลไม่เกี่ยวข้องเมื่อความคล้ายคลึงต่ำ หรือพลาดข้อมูลสำคัญที่กระจายอยู่
                 </ThaiText>
               </p>
             </Callout>
