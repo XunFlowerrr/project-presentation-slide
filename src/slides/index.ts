@@ -36,6 +36,7 @@ import { TeamDivider } from "./TeamDivider.tsx";
 import { MeetTheTeam } from "./MeetTheTeam.tsx";
 import { ProjectTimeline } from "./ProjectTimeline.tsx";
 import { FutureWork } from "./FutureWork.tsx";
+import { LandingPage } from "./LandingPage.tsx";
 
 export type SlideComponent = ComponentType;
 
@@ -93,6 +94,7 @@ const deck = [
       ProjectTimeline,
       FutureWork,
       ShowcaseLoop,
+      LandingPage,
     ],
   },
 ] as const satisfies { label: string; slides: SlideComponent[] }[];
@@ -106,5 +108,5 @@ export const sections: { label: string; count: number }[] = deck.map((s) => ({
   count: s.slides.length,
 }));
 
-/** Total slide count for the progress tracker visibility guard. */
-export const trackerSlideCount: number = slides.length;
+/** Total slide count for the progress tracker visibility guard (excludes the closing LandingPage). */
+export const trackerSlideCount: number = slides.length - 1;

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import {
   SlideHeader,
   SlideShell,
@@ -387,6 +387,17 @@ type ActiveCard = {
   height: number;
 };
 
+export interface SystemArchitectureDiagramProps {
+  allowPopover?: boolean;
+  nodeSize?: number;
+  gap?: string;
+  padding?: string;
+  showHeader?: boolean;
+  theme?: "light" | "dark";
+  disableAnimations?: boolean;
+  style?: CSSProperties;
+}
+
 function ServicePopover({
   active,
   onClose,
@@ -572,14 +583,25 @@ function FlowNode({
   anchorRef,
   delay = 0,
   onClick,
+  size = 188,
+  theme = "light",
 }: {
   id: keyof typeof NS;
   anchorRef: React.RefObject<HTMLDivElement | null>;
   delay?: number;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  size?: number;
+  theme?: "light" | "dark";
 }) {
   const s = NS[id];
   const Icon = s.icon;
+  const isDark = theme === "dark";
+  const borderRadius = Math.round(size * 0.18);
+  const badgeSize = Math.round(size * 0.38);
+  const badgeRadius = Math.round(size * 0.11);
+  const labelFontSize = Math.max(13, Math.round(size * 0.08));
+  const labelGap = Math.max(12, Math.round(size * 0.085));
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -587,7 +609,9 @@ function FlowNode({
       whileHover={{
         scale: 1.05,
         y: -4,
-        boxShadow: `0 16px 40px rgba(${s.rgb},0.4)`,
+        boxShadow: isDark
+          ? `0 20px 44px rgba(0,0,0,0.32), 0 0 0 1px rgba(${s.rgb},0.3)`
+          : `0 16px 40px rgba(${s.rgb},0.4)`,
         zIndex: 20,
         transition: { duration: 0.2, ease: "easeOut" },
       }}
@@ -601,29 +625,33 @@ function FlowNode({
         opacity: { delay, duration: DURATION.med, ease: EASE },
       }}
       style={{
-        width: 188,
-        height: 188,
-        borderRadius: 34,
-        border: `1.5px solid rgba(${s.rgb},0.25)`,
-        background: `linear-gradient(135deg, rgba(255,255,255,1), rgba(250,250,250,0.9))`,
+        width: size,
+        height: size,
+        borderRadius,
+        border: `1.5px solid rgba(${s.rgb},${isDark ? 0.38 : 0.25})`,
+        background: isDark
+          ? "linear-gradient(160deg, rgba(16,20,34,0.98), rgba(7,10,20,0.98))"
+          : "linear-gradient(135deg, rgba(255,255,255,1), rgba(250,250,250,0.9))",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 16,
-        boxShadow: `0 8px 24px rgba(${s.rgb},0.12)`,
+        gap: labelGap,
+        boxShadow: isDark
+          ? `0 20px 46px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)`
+          : `0 8px 24px rgba(${s.rgb},0.12)`,
         flexShrink: 0,
         position: "relative",
         zIndex: 10,
-        cursor: "pointer",
+        cursor: onClick ? "pointer" : "default",
       }}
     >
       <div ref={anchorRef}>
         <IconBadge
           gradient={s.grad}
           shadow={`rgba(${s.rgb},0.4)`}
-          size={72}
-          radius={20}
+          size={badgeSize}
+          radius={badgeRadius}
         >
           <Icon />
         </IconBadge>
@@ -631,7 +659,7 @@ function FlowNode({
       <div style={{ textAlign: "center", paddingLeft: 8, paddingRight: 8 }}>
         <div
           style={{
-            fontSize: 15,
+            fontSize: labelFontSize,
             fontWeight: 800,
             color: s.color,
             lineHeight: 1.2,
@@ -649,11 +677,13 @@ function PulseRing({
   color,
   rgb,
   version,
+  radius = 34,
 }: {
   show: boolean;
   color: string;
   rgb: string;
   version: number;
+  radius?: number;
 }) {
   if (!show) return null;
   return (
@@ -676,7 +706,7 @@ function PulseRing({
             style={{
               position: "absolute",
               inset: 0,
-              borderRadius: 34,
+              borderRadius: radius,
               border: `2px solid ${color}`,
               boxShadow: `0 0 14px 2px rgba(${rgb},0.3)`,
             }}
@@ -735,12 +765,38 @@ function GridBeam({
   );
 }
 
-export function SolutionOverview() {
+export function SystemArchitectureDiagram({
+  allowPopover = true,
+  nodeSize = 188,
+  gap = "24px 16px",
+  padding = "10px 0 30px",
+  showHeader = false,
+  theme = "light",
+  disableAnimations = false,
+  style,
+}: SystemArchitectureDiagramProps) {
   const [active, setActive] = useState<ActiveCard | null>(null);
   const [pulsingId, setPulsingId] = useState<keyof typeof NS | null>(null);
   const [pulseVersion, setPulseVersion] = useState(0);
   const measureRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isDark = theme === "dark";
+  const nodeRadius = Math.round(nodeSize * 0.18);
+  const serviceLayerBackground = isDark
+    ? "linear-gradient(90deg, rgba(124,58,237,0.14), rgba(217,70,239,0.08))"
+    : "linear-gradient(90deg, rgba(254,243,199,0.3), rgba(254,226,226,0.3))";
+  const serviceLayerBorder = isDark
+    ? "1px solid rgba(192,132,252,0.18)"
+    : "1px solid rgba(245,158,11,0.2)";
+  const serviceLayerLabelColor = isDark ? "#C4B5FD" : "#D97706";
+  const storageLayerBackground = isDark
+    ? "linear-gradient(90deg, rgba(45,212,191,0.12), rgba(163,230,53,0.08))"
+    : "linear-gradient(90deg, rgba(204,251,241,0.4), rgba(220,252,231,0.4))";
+  const storageLayerBorder = isDark
+    ? "1px solid rgba(52,211,153,0.18)"
+    : "1px solid rgba(16,185,129,0.2)";
+  const storageLayerLabelColor = isDark ? "#86EFAC" : "#059669";
+  const gridHeight = showHeader ? "calc(100% - 108px)" : "100%";
   // Single map of all card anchor refs — keyed by NS id.
   const cardRefs = useRef<
     Partial<Record<keyof typeof NS, HTMLDivElement | null>>
@@ -802,8 +858,20 @@ export function SolutionOverview() {
   }
 
   return (
-    <SlideShell glows={GLOWS}>
-      {/* Measurement reference — covers full slide for rect calculations */}
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        minHeight: 0,
+        overflow: "hidden",
+        borderRadius: isDark ? 28 : undefined,
+        background: isDark
+          ? "radial-gradient(circle at 50% -10%, rgba(124,58,237,0.12), transparent 42%), linear-gradient(180deg, rgba(8,11,20,0.98), rgba(5,8,16,0.96))"
+          : undefined,
+        ...style,
+      }}
+    >
       <div
         ref={measureRef}
         style={{
@@ -814,26 +882,28 @@ export function SolutionOverview() {
         }}
       />
 
-      <SlideHeader
-        label="Aingo"
-        title="Solution"
-        highlight="Overview."
-        titleSize={64}
-        paddingBottom={10}
-      />
+      {showHeader && (
+        <SlideHeader
+          label="Aingo"
+          title="Solution"
+          highlight="Overview."
+          titleSize={64}
+          paddingBottom={10}
+        />
+      )}
 
       <motion.div
         {...fadeInUp(0.2, { distance: DISTANCE.sm, duration: DURATION.med })}
         ref={containerRef}
         style={{
-          flex: 1,
           width: "100%",
+          height: gridHeight,
           position: "relative",
           display: "grid",
           gridTemplateColumns: "repeat(6, 1fr)",
           gridTemplateRows: "repeat(3, 1fr)",
-          gap: "24px 16px",
-          padding: "10px 0 30px",
+          gap,
+          padding,
           alignItems: "center",
           justifyItems: "center",
         }}
@@ -848,10 +918,9 @@ export function SolutionOverview() {
             gridRow: 2,
             width: "100%",
             height: "100%",
-            background:
-              "linear-gradient(90deg, rgba(254,243,199,0.3), rgba(254,226,226,0.3))",
+            background: serviceLayerBackground,
             borderRadius: 24,
-            border: "1px solid rgba(245,158,11,0.2)",
+            border: serviceLayerBorder,
             position: "relative",
             zIndex: 1,
             pointerEvents: "none",
@@ -865,7 +934,7 @@ export function SolutionOverview() {
               transform: "translateX(-50%)",
               fontSize: 10,
               fontWeight: 800,
-              color: "#D97706",
+              color: serviceLayerLabelColor,
             }}
           >
             Service Layer
@@ -881,10 +950,9 @@ export function SolutionOverview() {
             gridRow: 3,
             width: "100%",
             height: "100%",
-            background:
-              "linear-gradient(90deg, rgba(204,251,241,0.4), rgba(220,252,231,0.4))",
+            background: storageLayerBackground,
             borderRadius: 24,
-            border: "1px solid rgba(16,185,129,0.2)",
+            border: storageLayerBorder,
             position: "relative",
             zIndex: 1,
             pointerEvents: "none",
@@ -898,7 +966,7 @@ export function SolutionOverview() {
               transform: "translateX(-50%)",
               fontSize: 10,
               fontWeight: 800,
-              color: "#059669",
+              color: storageLayerLabelColor,
             }}
           >
             Storage Layer
@@ -922,12 +990,15 @@ export function SolutionOverview() {
             color={NS.frontend.color}
             rgb={NS.frontend.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="frontend"
             anchorRef={frontendRef}
             delay={0.3}
-            onClick={makeOnClick("frontend")}
+            onClick={allowPopover ? makeOnClick("frontend") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
 
@@ -948,12 +1019,15 @@ export function SolutionOverview() {
             color={NS.webhook.color}
             rgb={NS.webhook.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="webhook"
             anchorRef={webhookRef}
             delay={0.4}
-            onClick={makeOnClick("webhook")}
+            onClick={allowPopover ? makeOnClick("webhook") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
         <div
@@ -972,12 +1046,15 @@ export function SolutionOverview() {
             color={NS.storage.color}
             rgb={NS.storage.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="storage"
             anchorRef={storageRef}
             delay={0.5}
-            onClick={makeOnClick("storage")}
+            onClick={allowPopover ? makeOnClick("storage") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
         <div
@@ -996,12 +1073,15 @@ export function SolutionOverview() {
             color={NS.mq.color}
             rgb={NS.mq.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="mq"
             anchorRef={mqRef}
             delay={0.6}
-            onClick={makeOnClick("mq")}
+            onClick={allowPopover ? makeOnClick("mq") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
         <div
@@ -1020,12 +1100,15 @@ export function SolutionOverview() {
             color={NS.ingestion.color}
             rgb={NS.ingestion.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="ingestion"
             anchorRef={ingestRef}
             delay={0.7}
-            onClick={makeOnClick("ingestion")}
+            onClick={allowPopover ? makeOnClick("ingestion") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
         <div
@@ -1044,12 +1127,15 @@ export function SolutionOverview() {
             color={NS.embedding.color}
             rgb={NS.embedding.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="embedding"
             anchorRef={embedRef}
             delay={0.8}
-            onClick={makeOnClick("embedding")}
+            onClick={allowPopover ? makeOnClick("embedding") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
         <div
@@ -1068,12 +1154,15 @@ export function SolutionOverview() {
             color={NS.ai.color}
             rgb={NS.ai.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="ai"
             anchorRef={aiRef}
             delay={0.9}
-            onClick={makeOnClick("ai")}
+            onClick={allowPopover ? makeOnClick("ai") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
 
@@ -1094,12 +1183,15 @@ export function SolutionOverview() {
             color={NS.sharepoint.color}
             rgb={NS.sharepoint.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="sharepoint"
             anchorRef={sharepointRef}
             delay={0.45}
-            onClick={makeOnClick("sharepoint")}
+            onClick={allowPopover ? makeOnClick("sharepoint") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
         <div
@@ -1118,12 +1210,15 @@ export function SolutionOverview() {
             color={NS.s3.color}
             rgb={NS.s3.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="s3"
             anchorRef={s3Ref}
             delay={0.65}
-            onClick={makeOnClick("s3")}
+            onClick={allowPopover ? makeOnClick("s3") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
         <div
@@ -1142,143 +1237,147 @@ export function SolutionOverview() {
             color={NS.qdrant.color}
             rgb={NS.qdrant.rgb}
             version={pulseVersion}
+            radius={nodeRadius}
           />
           <FlowNode
             id="qdrant"
             anchorRef={qdrantRef}
             delay={0.85}
-            onClick={makeOnClick("qdrant")}
+            onClick={allowPopover ? makeOnClick("qdrant") : undefined}
+            size={nodeSize}
+            theme={theme}
           />
         </div>
 
         {/* Beams */}
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={sharepointRef}
-          toRef={webhookRef}
-          gradientStartColor={NS.sharepoint.color}
-          gradientStopColor={NS.webhook.color}
-          delay={1.0}
-        />
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={webhookRef}
-          toRef={storageRef}
-          gradientStartColor={NS.webhook.color}
-          gradientStopColor={NS.storage.color}
-          delay={1.2}
-        />
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={storageRef}
-          toRef={mqRef}
-          gradientStartColor={NS.storage.color}
-          gradientStopColor={NS.mq.color}
-          delay={1.4}
-        />
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={mqRef}
-          toRef={ingestRef}
-          gradientStartColor={NS.mq.color}
-          gradientStopColor={NS.ingestion.color}
-          delay={1.6}
-        />
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={ingestRef}
-          toRef={embedRef}
-          gradientStartColor={NS.ingestion.color}
-          gradientStopColor={NS.embedding.color}
-          delay={1.8}
-        />
+        {!disableAnimations && (
+          <>
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={sharepointRef}
+              toRef={webhookRef}
+              gradientStartColor={NS.sharepoint.color}
+              gradientStopColor={NS.webhook.color}
+              delay={1.0}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={webhookRef}
+              toRef={storageRef}
+              gradientStartColor={NS.webhook.color}
+              gradientStopColor={NS.storage.color}
+              delay={1.2}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={storageRef}
+              toRef={mqRef}
+              gradientStartColor={NS.storage.color}
+              gradientStopColor={NS.mq.color}
+              delay={1.4}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={mqRef}
+              toRef={ingestRef}
+              gradientStartColor={NS.mq.color}
+              gradientStopColor={NS.ingestion.color}
+              delay={1.6}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={ingestRef}
+              toRef={embedRef}
+              gradientStartColor={NS.ingestion.color}
+              gradientStopColor={NS.embedding.color}
+              delay={1.8}
+            />
 
-        {/* Diagonals */}
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={storageRef}
-          toRef={s3Ref}
-          gradientStartColor={NS.storage.color}
-          gradientStopColor={NS.s3.color}
-          delay={2.0}
-        />
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={s3Ref}
-          toRef={ingestRef}
-          gradientStartColor={NS.s3.color}
-          gradientStopColor={NS.ingestion.color}
-          delay={2.2}
-        />
+            {/* Diagonals */}
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={storageRef}
+              toRef={s3Ref}
+              gradientStartColor={NS.storage.color}
+              gradientStopColor={NS.s3.color}
+              delay={2.0}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={s3Ref}
+              toRef={ingestRef}
+              gradientStartColor={NS.s3.color}
+              gradientStopColor={NS.ingestion.color}
+              delay={2.2}
+            />
 
-        {/* Bidirectional Beams */}
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={embedRef}
-          toRef={aiRef}
-          gradientStartColor={NS.embedding.color}
-          gradientStopColor={NS.ai.color}
-          delay={2.4}
-          startYOffset={-16}
-          endYOffset={-16}
-        />
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={aiRef}
-          toRef={embedRef}
-          gradientStartColor={NS.ai.color}
-          gradientStopColor={NS.embedding.color}
-          delay={2.6}
-          startYOffset={16}
-          endYOffset={16}
-        />
-
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={aiRef}
-          toRef={frontendRef}
-          gradientStartColor={NS.ai.color}
-          gradientStopColor={NS.frontend.color}
-          delay={2.8}
-          startXOffset={-16}
-          endXOffset={-16}
-        />
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={frontendRef}
-          toRef={aiRef}
-          gradientStartColor={NS.frontend.color}
-          gradientStopColor={NS.ai.color}
-          delay={3.0}
-          startXOffset={16}
-          endXOffset={16}
-        />
-
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={embedRef}
-          toRef={qdrantRef}
-          gradientStartColor={NS.embedding.color}
-          gradientStopColor={NS.qdrant.color}
-          delay={3.2}
-          startXOffset={-16}
-          endXOffset={-16}
-        />
-        <GridBeam
-          containerRef={containerRef}
-          fromRef={qdrantRef}
-          toRef={embedRef}
-          gradientStartColor={NS.qdrant.color}
-          gradientStopColor={NS.embedding.color}
-          delay={3.4}
-          startXOffset={16}
-          endXOffset={16}
-        />
+            {/* Bidirectional Beams */}
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={embedRef}
+              toRef={aiRef}
+              gradientStartColor={NS.embedding.color}
+              gradientStopColor={NS.ai.color}
+              delay={2.4}
+              startYOffset={-16}
+              endYOffset={-16}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={aiRef}
+              toRef={embedRef}
+              gradientStartColor={NS.ai.color}
+              gradientStopColor={NS.embedding.color}
+              delay={2.6}
+              startYOffset={16}
+              endYOffset={16}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={aiRef}
+              toRef={frontendRef}
+              gradientStartColor={NS.ai.color}
+              gradientStopColor={NS.frontend.color}
+              delay={2.8}
+              startXOffset={-16}
+              endXOffset={-16}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={frontendRef}
+              toRef={aiRef}
+              gradientStartColor={NS.frontend.color}
+              gradientStopColor={NS.ai.color}
+              delay={3.0}
+              startXOffset={16}
+              endXOffset={16}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={embedRef}
+              toRef={qdrantRef}
+              gradientStartColor={NS.embedding.color}
+              gradientStopColor={NS.qdrant.color}
+              delay={3.2}
+              startXOffset={-16}
+              endXOffset={-16}
+            />
+            <GridBeam
+              containerRef={containerRef}
+              fromRef={qdrantRef}
+              toRef={embedRef}
+              gradientStartColor={NS.qdrant.color}
+              gradientStopColor={NS.embedding.color}
+              delay={3.4}
+              startXOffset={16}
+              endXOffset={16}
+            />
+          </>
+        )}
       </motion.div>
 
-      {/* Detail popover */}
       <AnimatePresence>
-        {active && (
+        {allowPopover && active && (
           <ServicePopover
             key={active.id}
             active={active}
@@ -1287,6 +1386,22 @@ export function SolutionOverview() {
           />
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+export function SolutionOverview() {
+  return (
+    <SlideShell glows={GLOWS}>
+      <SlideHeader
+        label="Aingo"
+        title="Solution"
+        highlight="Overview."
+        titleSize={64}
+        paddingBottom={10}
+      />
+
+      <SystemArchitectureDiagram style={{ flex: 1, height: "100%" }} />
     </SlideShell>
   );
 }
