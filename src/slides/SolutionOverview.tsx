@@ -14,14 +14,6 @@ const GLOWS = [
   { bottom: -150, left: -80, size: 500, color: "16,185,129", opacity: 0.07 },
 ];
 
-interface ActiveCard {
-  id: keyof typeof NS;
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-}
-
 function SVGWrap({ children }: { children: React.ReactNode }) {
   return (
     <svg

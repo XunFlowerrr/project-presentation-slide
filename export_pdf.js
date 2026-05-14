@@ -20,6 +20,8 @@ async function exportPdf() {
   console.log('Launching Puppeteer...');
   const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+  page.on('pageerror', error => console.log('PAGE ERROR:', error.message));
   await page.setViewport({ width: 1920, height: 1080 });
   
   console.log('Navigating to http://localhost:5173/?print ...');
