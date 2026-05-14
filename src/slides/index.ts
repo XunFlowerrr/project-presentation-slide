@@ -1,40 +1,41 @@
-import type { ComponentType } from 'react';
+import type { ComponentType } from "react";
 
-import { Cover           } from './Cover.tsx';
-import { TableOfContents } from './TableOfContents.tsx';
+import { Cover } from "./Cover.tsx";
+import { TableOfContents } from "./TableOfContents.tsx";
 
-import { ProblemDivider  } from './ProblemDivider.tsx';
-import { ProblemOverview } from './ProblemOverview.tsx';
-import { TheProblem      } from './TheProblem.tsx';
-import { WhySystemFails  } from './WhySystemFails.tsx';
-import { SystemEvolution } from './SystemEvolution.tsx';
+import { ProblemDivider } from "./ProblemDivider.tsx";
+import { ProblemOverview } from "./ProblemOverview.tsx";
+import { TheProblem } from "./TheProblem.tsx";
+import { WhySystemFails } from "./WhySystemFails.tsx";
+import { SystemEvolution } from "./SystemEvolution.tsx";
 
-import { ApproachDivider  } from './ApproachDivider.tsx';
-import { ObjectiveScope   } from './ObjectiveScope.tsx';
-import { OurApproach      } from './OurApproach.tsx';
-import { ExpectedResults  } from './ExpectedResults.tsx';
+import { ApproachDivider } from "./ApproachDivider.tsx";
+import { ObjectiveScope } from "./ObjectiveScope.tsx";
+import { OurApproach } from "./OurApproach.tsx";
+import { ExpectedResults } from "./ExpectedResults.tsx";
 
-import { SystemDivider     } from './SystemDivider.tsx';
-import { DemoVideo         } from './DemoVideo.tsx';
-import { SolutionOverview  } from './SolutionOverview.tsx';
-import { ServicesBreakdown } from './ServicesBreakdown.tsx';
-import { SharePointSync    } from './SharePointSync.tsx';
-import { IngestionPipeline } from './IngestionPipeline.tsx';
-import { ReActFlow         } from './ReActFlow.tsx';
-import { HydeDensityGap    } from './HydeDensityGap.tsx';
-import { InteractiveRAG    } from './InteractiveRAG.tsx';
-import { OperationalModes  } from './OperationalModes.tsx';
-import { AttachmentFlow    } from './AttachmentFlow.tsx';
-import { WebCapabilities   } from './WebCapabilities.tsx';
-import { WebCapabilities2  } from './WebCapabilities2.tsx';
+import { SystemDivider } from "./SystemDivider.tsx";
+import { DemoVideo } from "./DemoVideo.tsx";
+import { ShowcaseLoop } from "./ShowcaseLoop.tsx";
+import { SolutionOverview } from "./SolutionOverview.tsx";
+import { ServicesBreakdown } from "./ServicesBreakdown.tsx";
+import { SharePointSync } from "./SharePointSync.tsx";
+import { IngestionPipeline } from "./IngestionPipeline.tsx";
+import { ReActFlow } from "./ReActFlow.tsx";
+import { HydeDensityGap } from "./HydeDensityGap.tsx";
+import { InteractiveRAG } from "./InteractiveRAG.tsx";
+import { OperationalModes } from "./OperationalModes.tsx";
+import { AttachmentFlow } from "./AttachmentFlow.tsx";
+import { WebCapabilities } from "./WebCapabilities.tsx";
+import { WebCapabilities2 } from "./WebCapabilities2.tsx";
 
-import { EvalDivider  } from './EvalDivider.tsx';
-import { EvalResults  } from './EvalResults.tsx';
+import { EvalDivider } from "./EvalDivider.tsx";
+import { EvalResults } from "./EvalResults.tsx";
 
-import { TeamDivider      } from './TeamDivider.tsx';
-import { MeetTheTeam      } from './MeetTheTeam.tsx';
-import { ProjectTimeline  } from './ProjectTimeline.tsx';
-import { FutureWork       } from './FutureWork.tsx';
+import { TeamDivider } from "./TeamDivider.tsx";
+import { MeetTheTeam } from "./MeetTheTeam.tsx";
+import { ProjectTimeline } from "./ProjectTimeline.tsx";
+import { FutureWork } from "./FutureWork.tsx";
 
 export type SlideComponent = ComponentType;
 
@@ -45,19 +46,25 @@ export type SlideComponent = ComponentType;
 // ──────────────────────────────────────────────────────────────────────────
 const deck = [
   {
-    label: 'Intro',
+    label: "Intro",
     slides: [Cover, TableOfContents],
   },
   {
-    label: 'Problem',
-    slides: [ProblemDivider, ProblemOverview, TheProblem, WhySystemFails, SystemEvolution],
+    label: "Problem",
+    slides: [
+      ProblemDivider,
+      ProblemOverview,
+      TheProblem,
+      WhySystemFails,
+      SystemEvolution,
+    ],
   },
   {
-    label: 'Approach',
+    label: "Approach",
     slides: [ApproachDivider, ObjectiveScope, OurApproach, ExpectedResults],
   },
   {
-    label: 'System',
+    label: "System",
     slides: [
       SystemDivider,
       DemoVideo,
@@ -75,12 +82,18 @@ const deck = [
     ],
   },
   {
-    label: 'Testing',
+    label: "Testing",
     slides: [EvalDivider, EvalResults],
   },
   {
-    label: 'Team',
-    slides: [TeamDivider, MeetTheTeam, ProjectTimeline, FutureWork],
+    label: "Team",
+    slides: [
+      TeamDivider,
+      MeetTheTeam,
+      ProjectTimeline,
+      FutureWork,
+      ShowcaseLoop,
+    ],
   },
 ] as const satisfies { label: string; slides: SlideComponent[] }[];
 
