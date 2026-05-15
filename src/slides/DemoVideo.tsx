@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import videoSrc from "../assets/vid/AINGO-DEMO.mp4";
 
 export function DemoVideo() {
-  const isPrintMode = new URLSearchParams(window.location.search).has('print');
+  const isPrintMode = new URLSearchParams(window.location.search).has("print");
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -17,6 +17,7 @@ export function DemoVideo() {
       ref={videoRef}
       src={`${videoSrc}#t=0.1`}
       autoPlay={!isPrintMode}
+      loop
       controls
       preload="auto"
       style={{
