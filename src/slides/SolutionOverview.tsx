@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useRef, useState, type CSSProperties } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
+import { SlideContext } from "../context/SlideContext.tsx";
 import {
   SlideHeader,
   SlideShell,
@@ -824,6 +825,8 @@ export function SystemArchitectureDiagram({
   const s3Ref = useRef<HTMLDivElement>(null);
   const qdrantRef = useRef<HTMLDivElement>(null);
 
+  const { stepOverride } = useContext(SlideContext);
+
   function getCardRect(el: HTMLElement): Omit<ActiveCard, "id"> {
     const measureEl = measureRef.current!;
     const slideRect = measureEl.getBoundingClientRect();
@@ -837,16 +840,6 @@ export function SystemArchitectureDiagram({
     };
   }
 
-  function makeOnClick(id: keyof typeof NS) {
-    return (e: React.MouseEvent<HTMLDivElement>) => {
-      if (active?.id === id) {
-        setActive(null);
-        return;
-      }
-      setActive({ id, ...getCardRect(e.currentTarget) });
-    };
-  }
-
   // Called from service chips inside the popover — looks up the real card DOM node.
   function navigateTo(id: keyof typeof NS) {
     const el = cardRefs.current[id];
@@ -855,6 +848,40 @@ export function SystemArchitectureDiagram({
       setPulsingId(id);
       setPulseVersion((v) => v + 1);
     }
+  }
+
+  useEffect(() => {
+    if (stepOverride && stepOverride > 0) {
+      const timer = setTimeout(() => {
+        const order: (keyof typeof NS)[] = [
+          "frontend",
+          "webhook",
+          "storage",
+          "mq",
+          "ingestion",
+          "embedding",
+          "ai",
+          "sharepoint",
+          "s3",
+          "qdrant",
+        ];
+        const id = order[stepOverride - 1];
+        if (id) {
+          navigateTo(id);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [stepOverride]);
+
+  function makeOnClick(id: keyof typeof NS) {
+    return (e: React.MouseEvent<HTMLDivElement>) => {
+      if (active?.id === id) {
+        setActive(null);
+        return;
+      }
+      setActive({ id, ...getCardRect(e.currentTarget) });
+    };
   }
 
   return (
