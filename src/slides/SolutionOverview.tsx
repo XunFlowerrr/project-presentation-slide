@@ -396,7 +396,7 @@ export interface SystemArchitectureDiagramProps {
   showHeader?: boolean;
   theme?: "light" | "dark";
   disableAnimations?: boolean;
-  style?: CSSProperties;
+  style?: React.CSSProperties;
 }
 
 function ServicePopover({
