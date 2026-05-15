@@ -180,6 +180,8 @@ function Eyebrow({
 export function LandingPage() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const scrollContentRef = useRef<HTMLDivElement | null>(null);
+  const lenisRef = useRef<Lenis | null>(null);
+  const isAutoScrollingRef = useRef(false);
   const { scrollYProgress } = useScroll({ container: scrollRef });
   const [activeChapter, setActiveChapter] = useState(0);
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -204,6 +206,8 @@ export function LandingPage() {
       easing,
     });
 
+    lenisRef.current = lenis;
+
     const resizeObserver = new ResizeObserver(() => {
       lenis.resize();
     });
@@ -212,6 +216,111 @@ export function LandingPage() {
     return () => {
       resizeObserver.disconnect();
       lenis.destroy();
+      lenisRef.current = null;
+    };
+  }, []);
+
+  // ── Auto-scroll on inactivity (section-by-section) ───────────────────────
+  useEffect(() => {
+    const INACTIVITY_MS = 8_000; // idle before starting
+    const DWELL_MS = 3_000; // time to stay on each section
+    const SCROLL_DURATION = 1.4; // Lenis scrollTo duration (seconds)
+    const LOOP_PAUSE_MS = 600; // pause after jump-to-top before restarting
+
+    const wrapper = scrollRef.current;
+    const content = scrollContentRef.current;
+    if (!wrapper || !content) return;
+
+    let inactivityTimer: ReturnType<typeof window.setTimeout> | null = null;
+    let stepTimer: ReturnType<typeof window.setTimeout> | null = null;
+
+    const getSections = () =>
+      Array.from(content.querySelectorAll<HTMLElement>("[data-snap-section]"));
+
+    const scrollToSection = (idx: number) => {
+      if (!isAutoScrollingRef.current) return;
+      const sections = getSections();
+      if (!sections.length) return;
+      const lenis = lenisRef.current;
+      const target = sections[idx]?.offsetTop ?? 0;
+
+      if (lenis) {
+        lenis.scrollTo(target, {
+          duration: SCROLL_DURATION,
+          easing: (t: number) => 1 - Math.pow(1 - t, 3),
+        });
+      } else {
+        wrapper.scrollTop = target;
+      }
+
+      // After the animation finishes + dwell time, advance to next section
+      stepTimer = window.setTimeout(
+        () => {
+          if (!isAutoScrollingRef.current) return;
+          const nextIdx = idx + 1;
+          if (nextIdx >= sections.length) {
+            // End of loop — jump instantly to top, then restart
+            if (lenis) {
+              lenis.scrollTo(0, { immediate: true });
+            } else {
+              wrapper.scrollTop = 0;
+            }
+            stepTimer = window.setTimeout(() => {
+              if (isAutoScrollingRef.current) scrollToSection(0);
+            }, LOOP_PAUSE_MS);
+          } else {
+            scrollToSection(nextIdx);
+          }
+        },
+        SCROLL_DURATION * 1000 + DWELL_MS,
+      );
+    };
+
+    const startAutoScroll = () => {
+      isAutoScrollingRef.current = true;
+      // Resume from the closest section ahead of current scroll position
+      const sections = getSections();
+      const currentTop = wrapper.scrollTop;
+      let startIdx = 0;
+      for (let i = 0; i < sections.length; i++) {
+        if (sections[i].offsetTop <= currentTop + 40) startIdx = i;
+      }
+      // Start from next section unless we're already at the very top
+      const resumeIdx = currentTop < 40 ? 0 : (startIdx + 1) % sections.length;
+      scrollToSection(resumeIdx);
+    };
+
+    const stopAutoScroll = () => {
+      isAutoScrollingRef.current = false;
+      if (stepTimer !== null) {
+        clearTimeout(stepTimer);
+        stepTimer = null;
+      }
+    };
+
+    const onActivity = () => {
+      if (isAutoScrollingRef.current) stopAutoScroll();
+      if (inactivityTimer !== null) clearTimeout(inactivityTimer);
+      inactivityTimer = window.setTimeout(startAutoScroll, INACTIVITY_MS);
+    };
+
+    const EVENTS = [
+      "wheel",
+      "touchstart",
+      "mousedown",
+      "keydown",
+      "pointerdown",
+    ] as const;
+    EVENTS.forEach((ev) =>
+      wrapper.addEventListener(ev, onActivity, { passive: true }),
+    );
+
+    inactivityTimer = window.setTimeout(startAutoScroll, INACTIVITY_MS);
+
+    return () => {
+      stopAutoScroll();
+      if (inactivityTimer !== null) clearTimeout(inactivityTimer);
+      EVENTS.forEach((ev) => wrapper.removeEventListener(ev, onActivity));
     };
   }, []);
 
